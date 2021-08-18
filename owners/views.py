@@ -37,17 +37,30 @@ class OwnerProfilerView(View):
         data  = json.loads(request.body)
         owner_profile = Owner.objects.filter(name=data['name'])
         result = []
+
+        def getting_dogs_list(owner_profile_id):
+            my_dogs_list = Dog.objects.filter(owner_id=owner_profile_id)
+            res = []
+
+            for dog_info in my_dogs_list:
+                res.append({
+                    'name' : dog_info.name,
+                    'age' : dog_info.age    
+                })
+            return res
+
         try:
             if owner_profile.exists():
                 for info in owner_profile:
                     result.append({
-                        'name'  : info.name,
-                        'email' : info.email,
-                        'age'   : info.age
+                        'name'         : info.name,
+                        'email'        : info.email,
+                        'age'          : info.age,
+                        'my_dogs_list' : getting_dogs_list(info.id)
                     })
                 return JsonResponse({'result':result}, status=200)
             else:
-               return JsonResponse({'message':'Unregistered owner!!'}, status=404) 
+                return JsonResponse({'message':'Unregistered owner!!'}, status=404) 
         except:
             return JsonResponse({'message':'Error!'}, status=400)
         
